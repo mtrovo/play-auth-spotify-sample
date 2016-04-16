@@ -18,7 +18,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
  * application's home page.
  */
 @Singleton
-class HomeController @Inject() (ws: WSClient, configuration: Configuration) extends Controller {
+class SpotifyOAuthController @Inject()(ws: WSClient, configuration: Configuration) extends Controller {
   val stateKey = "spotify_auth_state"
   lazy val clientId = configuration.getString("spotify.clientId").get
   lazy val clientSecret = configuration.getString("spotify.clientSecret").get
@@ -53,7 +53,7 @@ class HomeController @Inject() (ws: WSClient, configuration: Configuration) exte
           .get.map[Result] { meResp =>
           Ok(meResp.body)
         }
-      case _ => Future.successful(Redirect(routes.HomeController.login()))
+      case _ => Future.successful(Redirect(routes.SpotifyOAuthController.login()))
     }
   }
 
@@ -76,7 +76,7 @@ class HomeController @Inject() (ws: WSClient, configuration: Configuration) exte
           val refreshToken = (jsonResp \ "refresh_token").get.as[String]
 
           Future.successful(
-            Redirect(routes.HomeController.showMe())
+            Redirect(routes.SpotifyOAuthController.showMe())
               .discardingCookies(DiscardingCookie(stateKey))
               .withSession("access_token" -> accessToken, "refresh_token" -> refreshToken))
         }
